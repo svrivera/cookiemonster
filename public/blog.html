@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Blog</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; max-width: 800px; margin: 0 auto; }
+        header { background: #f4f4f4; padding: 1rem; text-align: center; }
+        article { border-bottom: 1px solid #ccc; padding: 20px 0; }
+        #comments { margin-top: 20px; }
+        .comment { background: #f9f9f9; padding: 10px; margin-bottom: 10px; }
+        form { margin-top: 20px; }
+        input, textarea { width: 100%; padding: 8px; margin-bottom: 10px; }
+        button { background: #333; color: #fff; padding: 10px 15px; border: none; cursor: pointer; }
+        button:hover { background: #555; }
+        #cookie-monster-info { background: #f0f0f0; border: 1px solid #ddd; padding: 10px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>My Blog</h1>
+    </header>
+
+    <main>
+        <article>
+            <h2>My First Blog Post</h2>
+            <p>This is the content of my first blog post. It's very exciting!</p>
+        </article>
+
+        <section id="comments">
+            <h3>Comments</h3>
+            <div id="commentList"></div>
+        </section>
+
+        <form id="commentForm">
+            <h3>Leave a Comment</h3>
+            <input type="email" id="email" placeholder="Your email" required>
+            <textarea id="commentText" placeholder="Your comment" required></textarea>
+            <button type="submit">Submit Comment</button>
+        </form>
+    </main>
+
+    <script>
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        document.getElementById('commentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const comment = document.getElementById('commentText').value;
+            
+            // Save email in a cookie
+            setCookie('userEmail', email, 30); // Cookie expires in 30 days
+
+            // Add comment to the page
+            const commentElement = document.createElement('div');
+            commentElement.className = 'comment';
+            commentElement.innerHTML = `<strong>${email}</strong>: ${comment}`;
+            document.getElementById('commentList').appendChild(commentElement);
+
+            // Clear the form
+            document.getElementById('email').value = '';
+            document.getElementById('commentText').value = '';
+
+            // Refresh the page to update CookieMonster information
+            location.reload();
+        });
+
+        // Pre-fill email if cookie exists
+        window.onload = function() {
+            const savedEmail = getCookie('userEmail');
+            if (savedEmail) {
+                document.getElementById('email').value = savedEmail;
+            }
+        };
+    </script>
+</body>
+</html>

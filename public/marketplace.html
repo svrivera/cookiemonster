@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarketPlace Hub</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; }
+        header { background: #333; color: #fff; text-align: center; padding: 1rem; }
+        main { padding: 20px; }
+        .product { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; }
+        footer { background: #333; color: #fff; text-align: center; padding: 1rem; bottom: 0; width: 100%; }
+        .add-to-cart { 
+            background: #4CAF50; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            cursor: pointer; 
+            display: block; 
+            margin-top: 10px;
+        }
+        .add-to-cart:hover { background: #45a049; }
+        #cart {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        #cart-items {
+            list-style-type: none;
+            padding: 0;
+        }
+        #cart-items li {
+            margin-bottom: 10px;
+            padding: 5px;
+            border: 1px solid #eee;
+        }
+        #cart-total {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>MarketPlace Hub</h1>
+    </header>
+    <main>
+        <div id="cart">
+            <h2>Your Cart</h2>
+            <ul id="cart-items"></ul>
+            <div id="cart-total"></div>
+        </div>
+        <h2>Featured Products</h2>
+        <div class="product">
+            <h3>Smartphone X</h3>
+            <p>Latest model with advanced features. Price: $599</p>
+            <button class="add-to-cart" onclick="addToCart('Smartphone X', 599)">Add to Cart</button>
+        </div>
+        <div class="product">
+            <h3>Laptop Pro</h3>
+            <p>High-performance laptop for professionals. Price: $1299</p>
+            <button class="add-to-cart" onclick="addToCart('Laptop Pro', 1299)">Add to Cart</button>
+        </div>
+        <div class="product">
+            <h3>Smart Watch</h3>
+            <p>Stay connected on the go. Price: $199</p>
+            <button class="add-to-cart" onclick="addToCart('Smart Watch', 199)">Add to Cart</button>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 MarketPlace Hub. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function addToCart(product, price) {
+            fetch('/add-to-cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ product, price }),
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert(`Added ${product} to cart!`);
+                    loadCart();
+                } else {
+                    alert('Failed to add item to cart');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while adding the item to cart');
+            });
+        }
+
+        function loadCart() {
+            fetch('/cart')
+                .then(response => response.json())
+                .then(data => {
+                    const cartList = document.getElementById('cart-items');
+                    const cartTotal = document.getElementById('cart-total');
+                    cartList.innerHTML = '';
+                    
+                    data.items.forEach((item, index) => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            ${item.product} - $${item.price.toFixed(2)}
+                            <button onclick="removeCartItem(${index})">Remove</button>
+                        `;
+                        cartList.appendChild(li);
+                    });
+
+                    cartTotal.textContent = `Total: $${data.totalSum.toFixed(2)}`;
+                });
+        }
+
+        function removeCartItem(index) {
+            fetch(`/cart/${index}`, { method: 'DELETE' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Cart item removed');
+                        loadCart();
+                    } else {
+                        alert('Failed to remove cart item');
+                    }
+                });
+        }
+
+        // Load cart on page load
+        window.onload = loadCart;
+    </script>
+</body>
+</html>
